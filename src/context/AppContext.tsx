@@ -19,6 +19,7 @@ export function useStateHooks() {
   const [isTrigFunctionActive, setIsTrigFunctionActive] = useState(false)
   const [isArcTrigFunctionActive, setIsArcTrigFunctionActive] = useState(false)
   const [isInverseActive, setIsInverseActive] = useState(false)
+  const [isError, setIsError] = useState(false)
 
   const trigFunctions = ['sin(', 'cos(', 'tan(']
   const arcTrigFunctions = ['asin(', 'acos(', 'atan(']
@@ -49,10 +50,12 @@ export function useStateHooks() {
 
   function handleChange(keyObject: KeyObjectType) {
     if (keyObject.key === 'CE') {
+      setIsError(false)
       setTextInWindow('0')
       setTextForCalculation('0')
       return
     }
+    if (isError) return
     if (keyObject.key === '=') {
       calculate()
       return
@@ -83,9 +86,15 @@ export function useStateHooks() {
 
   function calculate() {
     console.log(textForCalculation)
-    const answer = round(evaluate(textForCalculation), 13).toString()
-    setTextInWindow(answer)
-    setTextForCalculation(answer)
+    try {
+      const answer = round(evaluate(textForCalculation), 13).toString()
+      setTextInWindow(answer)
+      setTextForCalculation(answer)
+    } catch (error) {
+      setTextInWindow((prev) => `Error, '${prev}' is not valid.`)
+      setTextForCalculation('')
+      setIsError(true)
+    }
   }
   return {
     textInWindow,
